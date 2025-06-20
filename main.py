@@ -1,43 +1,33 @@
 import cv2
 import numpy as np
+#
+# img = cv2.imread("Images/skr.jpg")
+# gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+#
+# model = cv2.CascadeClassifier('faces.xml')
+#
+# results = model.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=15)
+#
+# for (x, y, w, h) in results:
+#     cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-def rotate(frame, angle):
-    height, width = frame.shape[:2]
-    point = (height // 2, width // 2)
-    matrix = cv2.getRotationMatrix2D(point, angle, 1)
-    return cv2.warpAffine(frame, matrix, (width, height))
-
-def shift(frame, x, y):
-    matrix = np.float32([[1, 0, x], [0, 1, y]])
-    return cv2.warpAffine(frame, matrix, (frame.shape[1], frame.shape[0]))
-
-video = cv2.VideoCapture("../OpenCV/Videos/video.mp4")
-
+video = cv2.VideoCapture(0)
+model = cv2.CascadeClassifier('faces.xml')
 
 while True:
-    ret, frame = video.read()
+    res, img = video.read()
 
-    if not ret:
+    if not res:
         break
 
-    frame = cv2.GaussianBlur(frame, (7, 7), 2)
-    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    frame = cv2.Canny(frame, 100, 100)
+    results = model.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=15)
 
-    kernel = np.ones((2, 2), np.uint8)
-    frame = cv2.dilate(frame, kernel)
-    frame = cv2.erode(frame, kernel)
-
-    print(frame.shape)
-
-    # frame = rotate(frame, 60)
-    frame = shift(frame, 100, 50)
-
-    cv2.imshow("video", frame)
+    for (x, y, w, h) in results:
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-video.release()
-cv2.destroyAllWindows()
+    cv2.imshow("p", img)
